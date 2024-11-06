@@ -1,0 +1,206 @@
+import RPi.GPIO as GPIO
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import time
+
+# Email credentials and recipient
+SENDER_EMAIL = "your_email@gmail.com"
+SENDER_PASSWORD = "your_password"  # Gmail app-specific password or regular password
+RECEIVER_EMAIL = "receiver_email@gmail.com"
+
+# GPIO setup
+GPIO.setmode(GPIO.BCM)
+IR_PIN = 17  # GPIO pin where the IR sensor's OUT pin is connected
+GPIO.setup(IR_PIN, GPIO.IN)
+
+def send_alert(subject, message):
+    """Send an email alert when motion is detected."""
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = RECEIVER_EMAIL
+        msg['Subject'] = subject
+        msg.attach(MIMEText(message, 'plain'))
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
+        server.quit()
+        print("Alert sent successfully.")
+    except Exception as e:
+        print("Error sending alert:", e)
+
+def monitor_motion():
+    """Monitor the IR sensor and send an alert if motion is detected."""
+    print("Starting motion detection...")
+    
+    try:
+        while True:
+            # Check for motion detection
+            if GPIO.input(IR_PIN):
+                print("Motion detected!")
+                send_alert(
+                    subject="Motion Alert",
+                    message="Motion has been detected in the monitored area!"
+                )
+                # Pause to avoid multiple alerts for a single motion
+                time.sleep(5)
+            else:
+                print("No motion detected.")
+            
+            # Wait a bit before checking again
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Stopping motion detection.")
+    finally:
+        GPIO.cleanup()
+
+# Run the monitoring function
+monitor_motion()
+
+------------------------------------------------------------------------------------------------------------------------
+
+import RPi.GPIO as GPIO
+import time
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+
+SMTP_SERVER = 'smtp.gmail.com' 
+SMTP_PORT = 587 
+SMTP_USERNAME = 'sstisgaonkar371122@kkwagh.edu.in'  
+SMTP_PASSWORD = 'SarthakKKWagh'  
+EMAIL_FROM = 'sstisgaonkar371122@kkwagh.edu.in'  
+EMAIL_TO = 'shreeyanpatil02@gmail.com'  
+EMAIL_SUBJECT = 'Object Detected!'
+
+
+IR_SENSOR_PIN = 7
+LED_PIN = 11 
+
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(IR_SENSOR_PIN, GPIO.IN)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+def send_email():
+    try:
+        # Create a secure SSL context
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+
+        # Email content
+        message = MIMEMultipart()
+        message['From'] = EMAIL_FROM
+        message['To'] = EMAIL_TO
+        message['Subject'] = EMAIL_SUBJECT
+        body = "An object has been detected by the IR sensor."
+        message.attach(MIMEText(body, 'plain'))
+
+        # Send email
+        server.sendmail(EMAIL_FROM, EMAIL_TO, message.as_string())
+
+        # Clean up
+        server.quit()
+        print("Email sent successfully!")
+
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+try:
+    while True:
+        if GPIO.input(IR_SENSOR_PIN) == GPIO.HIGH:
+            print("Object detected!")
+            GPIO.output(LED_PIN, GPIO.HIGH)  # Turn on LED
+            send_email()  # Send email notification
+            time.sleep(1)  # Delay to avoid multiple emails in quick succession
+        else:
+            print("No object detected.")
+            GPIO.output(LED_PIN, GPIO.LOW)  # Turn off LED
+        
+        time.sleep(0.5)
+
+except KeyboardInterrupt:
+    print("\nExiting program.")
+finally:
+    GPIO.cleanup()
+
+------------------------------------------------------------------------------------------
+
+import RPi.GPIO as GPIO
+import time
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+'''SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587
+SMTP_USERNAME = 'kksupekar371121@kkwagh.edu.in'  
+SMTP_PASSWORD = 'Ksupekar@2003'  
+EMAIL_FROM = 'kksupekar371121@kkwagh.edu.in' '''
+
+
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587
+SMTP_USERNAME = 'kksupekar371121@kkwagh.edu.in'  
+SMTP_PASSWORD = 'Ksupekar@2003'  
+EMAIL_FROM = 'kksupekar371121@kkwagh.edu.in'
+
+EMAIL_TO ='ayushbhavsar299@gmail.com'
+EMAIL_SUBJECT = 'Object Detected!'
+
+
+IR_SENSOR_PIN = 21
+LED_PIN = 11
+
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(IR_SENSOR_PIN, GPIO.IN)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+def send_email():
+    try:
+        # Create a secure SSL context
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+
+        # Email content
+        message = MIMEMultipart()
+        message['From'] = EMAIL_FROM
+        message['To'] = EMAIL_TO
+        message['Subject'] = EMAIL_SUBJECT
+        body = "An object has been detected by the IR sensor."
+        message.attach(MIMEText(body, 'plain'))
+
+        # Send email
+        server.sendmail(EMAIL_FROM, EMAIL_TO, message.as_string())
+
+        # Clean up
+        server.quit()
+        print("Email sent successfully!")
+
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+try:
+    while True:
+        if GPIO.input(IR_SENSOR_PIN) == GPIO.LOW:
+            print("Object detected!")
+            GPIO.output(LED_PIN, GPIO.HIGH)  # Turn on LED
+            send_email()  # Send email notification
+            time.sleep(1)  # Delay to avoid multiple emails in quick succession
+        else:
+            print("No object detected.")
+            GPIO.output(LED_PIN, GPIO.LOW)  # Turn off LED
+       
+        time.sleep(0.5)
+
+except KeyboardInterrupt:
+    print("\nExiting program.")
+finally:
+    GPIO.cleanup()
